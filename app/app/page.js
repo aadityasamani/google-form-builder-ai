@@ -83,7 +83,7 @@ export default function Home() {
           </div>
         </div>
         <div className="navbar-right">
-          {isSignedIn ? (
+          {isSignedIn && (
             <>
               <div className="user-info">
                 {session.user?.image && (
@@ -103,16 +103,6 @@ export default function Home() {
                 Sign out
               </button>
             </>
-          ) : (
-            <button
-              className="btn btn-google"
-              onClick={() => signIn("google")}
-              id="signin-btn"
-              disabled={status === "loading"}
-            >
-              <GoogleIcon />
-              Sign in with Google
-            </button>
           )}
         </div>
       </nav>
@@ -325,24 +315,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* How It Works */}
-        <section className="how-it-works">
-          <div className="section-title">How it works</div>
-          <div className="steps-grid">
-            {[
-              { num: 1, title: "Sign in with Google", desc: "One click — your forms go straight to your Drive." },
-              { num: 2, title: "Describe your form", desc: "Type any prompt in plain English. Quiz, survey, feedback — anything." },
-              { num: 3, title: "AI builds it for you", desc: "Groq AI understands your prompt and structures the form perfectly." },
-              { num: 4, title: "Share the link", desc: "Get an instant shareable link. Your teachers, students, everyone can fill it." },
-            ].map((step) => (
-              <div className="step-card" key={step.num}>
-                <div className="step-num">{step.num}</div>
-                <h3>{step.title}</h3>
-                <p>{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
       </main>
 
       {/* Footer */}
