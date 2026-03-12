@@ -18,6 +18,16 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [groqKey, setGroqKey] = useState("");
+  const [showKeyInput, setShowKeyInput] = useState(false);
+
+  // Load saved key on mount
+  useState(() => {
+    if (typeof window !== "undefined") {
+      const savedKey = localStorage.getItem("groqApiKey");
+      if (savedKey) setGroqKey(savedKey);
+    }
+  }, []);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -25,10 +35,19 @@ export default function Home() {
     setError(null);
     setResult(null);
 
+    if (!groqKey.trim()) {
+      setError("Please provide your Groq API Key in settings.");
+      setShowKeyInput(true);
+      return;
+    }
+
     try {
       const res = await fetch("/api/generate-form", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-groq-api-key": groqKey.trim() 
+        },
         body: JSON.stringify({ prompt: prompt.trim() }),
       });
 
@@ -97,6 +116,13 @@ export default function Home() {
               </div>
               <button
                 className="btn btn-secondary"
+                onClick={() => setShowKeyInput(!showKeyInput)}
+                title="API Settings"
+              >
+                ⚙️
+              </button>
+              <button
+                className="btn btn-secondary"
                 onClick={() => signOut()}
                 id="signout-btn"
               >
@@ -109,6 +135,55 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="main-content">
+        {/* Settings Panel */}
+        {isSignedIn && showKeyInput && (
+          <section className="settings-panel" style={{
+            background: "var(--bg-card)",
+            padding: "1rem 1.5rem",
+            borderRadius: "12px",
+            border: "1px solid var(--border)",
+            marginBottom: "2rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.5rem"
+          }}>
+            <h3 style={{ margin: 0, fontSize: "1rem" }}>Groq API Configuration</h3>
+            <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
+              To generate forms without limits, please provide your own free Groq API Key. 
+              <br/>
+              <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary)", textDecoration: "underline" }}>Get your key here</a> (it's free!).
+            </p>
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+              <input
+                type="password"
+                placeholder="gsk_xxxxxxxxxxxxxxxxxxxxxx"
+                value={groqKey}
+                onChange={(e) => {
+                  setGroqKey(e.target.value);
+                  localStorage.setItem("groqApiKey", e.target.value);
+                }}
+                style={{
+                  flex: 1,
+                  padding: "0.5rem",
+                  borderRadius: "8px",
+                  border: "1px solid var(--border)",
+                  background: "var(--bg)",
+                  color: "var(--text)"
+                }}
+              />
+              <button 
+                className="btn btn-primary"
+                onClick={() => {
+                  localStorage.setItem("groqApiKey", groqKey);
+                  setShowKeyInput(false);
+                }}
+              >
+                Save
+              </button>
+            </div>
+          </section>
+        )}
+
         {/* Hero */}
         <section className="hero">
           <div className="hero-badge">

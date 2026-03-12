@@ -36,8 +36,6 @@ const authOptions = {
     secret: process.env.NEXTAUTH_SECRET,
 };
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
 export async function POST(req) {
     try {
         const session = await getServerSession(authOptions);
@@ -49,6 +47,16 @@ export async function POST(req) {
             );
         }
 
+        const userGroqKey = req.headers.get("x-groq-api-key");
+        if (!userGroqKey) {
+            return NextResponse.json(
+                { error: "Please provide a valid Groq API Key in your settings." },
+                { status: 400 }
+            );
+        }
+
+        const groq = new Groq({ apiKey: userGroqKey });
+
         const { prompt } = await req.json();
 
         if (!prompt || prompt.trim().length === 0) {
@@ -59,7 +67,9 @@ export async function POST(req) {
         }
 
         // Step 1: Use Groq to convert prompt → structured form JSON
-        const groqResponse = await groq.chat.completions.create({
+        let groqResponse;
+        try {
+            groqResponse = await groq.chat.completions.create({
             model: "llama-3.3-70b-versatile",
             messages: [
                 {
@@ -101,6 +111,13 @@ Rules:
             temperature: 0.7,
             max_tokens: 2000,
         });
+        } catch (groqError) {
+             console.error("Groq API Error:", groqError);
+             return NextResponse.json(
+                 { error: "Failed to connect to Groq. Please check if your API key is correct and valid." },
+                 { status: 400 }
+             );
+        }
 
         let formSchema;
         try {
