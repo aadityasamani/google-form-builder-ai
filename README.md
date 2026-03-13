@@ -54,7 +54,6 @@ FormAI leverages the power of Large Language Models (LLMs) and the Google Forms 
     GOOGLE_CLIENT_SECRET=your_google_client_secret
     NEXTAUTH_SECRET=your_nextauth_secret
     NEXTAUTH_URL=http://localhost:3000
-    GROQ_API_KEY=your_groq_api_key
     ```
 
 4.  **Run the development server**:
